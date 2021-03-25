@@ -1,0 +1,154 @@
+ <!DOCTYPE html>
+<html>
+      <head>
+            <title></title>
+            <style>
+                  html,body { margin: 0; padding: 0; overflow: hidden; }
+                  #info {
+                  position: absolute;
+                  padding: 10px;
+                  width: 100%;
+                  text-align: center;
+                  color: #FFFFFF;
+                  }
+            </style>
+      </head>
+       <body>
+            <div id="info"><p></p>
+                  Pulse la tecla T para realizar el evento de transformación<br/>
+            </div>
+
+            <script src="js/three.min.js"></script>
+            <script>
+                  var scene, aspect, camera, renderer;
+                  var startTime = Date.now();
+                  var bArrrow = false;
+                  var cont=0;
+                  var px=-3,py=0,pz=0;
+                  init();
+                  animate();
+
+                  function init() {
+
+                        
+                        scene = new THREE.Scene();
+                        aspect=window.innerWidth / window.innerHeight;
+                        camera = new THREE.PerspectiveCamera( 45, aspect, 0.1, 1000);
+                        renderer = new THREE.WebGLRenderer();
+                        renderer.setSize( window.innerWidth, window.innerHeight );
+                        document.body.appendChild( renderer.domElement );
+
+                        var onKeyUp = function ( event ) {
+                              switch ( event.keyCode ) {
+                                    case 84:
+                                    bArrrow = true;
+                                    break;
+                              }
+                        }
+
+                        document.addEventListener( 'keyup', onKeyUp, false );
+
+                        
+                        var size = 10;
+                        var arrowSize = 3.5;
+                        var divisions = size;
+                        var origin = new THREE.Vector3( 0, 0, 0 );
+                        var x = new THREE.Vector3( 1, 0, 0 );
+                        var y = new THREE.Vector3( 0, 1, 0 );
+                        var z = new THREE.Vector3( 0, 0, 1 );
+                        var color1 = new THREE.Color( 0xFFFFFF );
+                        var color2 = new THREE.Color( 0x333333 );
+                        var colorR = new THREE.Color( 0xAA3333 );
+                        var colorG = new THREE.Color( 0x33AA33 );
+                        var colorB = new THREE.Color( 0x333366 );
+
+                        
+                        var axesHelper = new THREE.AxesHelper( size );
+                        var gridHelperXY = new THREE.GridHelper( size, divisions, color1, color1);
+                        var gridHelperXZ = new THREE.GridHelper( size, divisions, color2, color2 );
+                        var gridHelperYZ = new THREE.GridHelper( size, divisions, color2, color2 );
+
+                       
+                        gridHelperXY.rotateOnWorldAxis ( x, THREE.Math.degToRad(90) );
+                        gridHelperXZ.rotateOnWorldAxis ( y, THREE.Math.degToRad(90) );
+                        gridHelperYZ.rotateOnWorldAxis ( z, THREE.Math.degToRad(90) );
+            
+                        
+                        var arrowX = new THREE.ArrowHelper( x, origin, arrowSize, colorR );
+                        var arrowY = new THREE.ArrowHelper( y, origin, arrowSize, colorG );
+                        var arrowZ = new THREE.ArrowHelper( z, origin, arrowSize, colorB );
+
+                        
+                        var geometry = new THREE.ConeGeometry( 1, 1, 10 );
+             
+                        
+                        var material = new THREE.MeshNormalMaterial();
+
+                        
+                        cone=new THREE.Mesh( geometry, material );
+                        cone.rotateX(Math.PI/2);     
+                        cone.translateY(0.5);
+                        scene.add( gridHelperXZ );
+                        scene.add( arrowX );    
+                        scene.add( arrowY );    
+                        scene.add( arrowZ );    
+                        scene.add( cone );
+                  
+                        
+                        camera.position.x=2;
+                        camera.position.y=3;
+                        camera.position.z=10;
+                        camera.lookAt( origin );
+                  }
+		
+                  function animate(){
+                        render();
+                        requestAnimationFrame( animate );
+                  }
+
+                  function render(){
+                        var dtime = Date.now()-startTime;
+                        var sx=1, sy=1, sz=1;
+                        var radi=0;
+
+                        if(bArrrow){
+                              sx=3;
+                              radi=Math.PI/2;
+                        }
+                        
+                        var m1 = new THREE.Matrix4();       
+                        var m2 = new THREE.Matrix4();       
+                        var co=Math.cos(radi), se=Math.sin(radi);
+                        var c1=Math.cos(-3*Math.PI/50), s1=Math.sin(-3*Math.PI/50);
+                       
+
+                        m1.set( co*sx, 0, se*sx, 0,
+                                0, sy, 0, 0, 
+                               -se*sz, 0, co*sz, 0,
+                               0, 0, 0, 1  );
+
+                        m2.set( 1, 0, 0, px,
+                                0, 1, 0, py, 
+                                0, 0, 1, pz,
+                                0, 0, 0, 1  );
+
+                        if(bArrrow && cont==0){
+                              cone.applyMatrix4(m1);             
+                              cone.elementsNeedUpdate = true;     
+                              bArrrow=false;
+                              cont++;
+                            }
+
+                        if(bArrrow && cont==3){
+                              cone.applyMatrix4(m2);
+                              cone.elementsNeedUpdate = true;     
+                              bArrrow=false;
+                              cont++;
+                        }
+                        camera.lookAt( 0, 0, 0 );
+                        renderer.render( scene, camera );
+                  }
+            
+            </script>
+      </body>
+</html>
